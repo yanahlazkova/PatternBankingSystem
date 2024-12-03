@@ -19,3 +19,9 @@ class Bank:
 
     def add_account(self, account):
         self.accounts.append(account)
+
+    def get_list_clients(self):
+        return (client for client in self.clients)
+
+    def get_list_accounts(self):
+        return (account for account in self.accounts)
