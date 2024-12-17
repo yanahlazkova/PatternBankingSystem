@@ -1,86 +1,122 @@
 from abc import ABC, abstractmethod
+from faker import Faker
 
+faker = Faker()
 
 class AbstractAccount(ABC):
-    account_number: int
-    balance: float
-    owner_name: str
-    interest_rate: float
+    account_type: str = None
+    account_number: int = None
+    balance: float = 0.0
+    owner_id: str = None
+    interest_rate: float = None
 
     @abstractmethod
+    def set_account_type(self):
+        pass
+
     def get_account_type(self):
-        pass
+        return self.account_type
 
-    @abstractmethod
+    def set_account_number(self, account_number):
+        self.account_number = account_number
+
+    def set_owner(self, owner_id):
+        self.owner_id = owner_id
+
     def get_owner(self):
-        pass
+        return self.owner_id
+
+    def set_interest_rate(self, interest_rate):
+        self.interest_rate = interest_rate
 
     @abstractmethod
     def set_balance(self, balance):
+        pass
+
+    @abstractmethod
+    def deposit(self, amount):
+        """ Метод внесення коштів на рахунок """
+        pass
+
+    @abstractmethod
+    def withdraw(self, amount):
+        """ Метод зняття коштів з рахунку """
         pass
 
     def __str__(self):
-        return (f'Client: Name {self.owner_name}'
-                f'Type account: "savings"'
-                f'balance: {self.balance}')
+        return (f'Client ID: {self.owner_id}\n'
+                f'Account: "{self.account_type}" - "{self.account_number}"\n'
+                f'balance: {self.balance} $')
 
 
 class SavingsAccount(AbstractAccount):
-    def __init__(self, owner):
+    def set_account_type(self):
         self.account_type = 'savings'
-        self.owner = owner
 
-    def get_account_type(self):
-        return self.account_type
-
-    def get_owner(self):
-        return self.owner
+    def set_interest_rate(self, interest_rate):
+        self.interest_rate = interest_rate
 
     def set_balance(self, balance):
+        self.balance += self.balance
         return self.balance
+
+    def deposit(self, amount):
+        self.set_balance(amount)
+
+    def withdraw(self, amount):
+        self.balance -= amount if self.balance - amount else f'Не достатньо коштів на рахунку'
 
 
 class DepositAccount(AbstractAccount):
-    def __init__(self, owner):
+    def set_account_type(self):
         self.account_type = 'deposit'
-        self.owner = owner
 
     def get_account_type(self):
         return self.account_type
 
-    def get_owner(self):
-        return self.owner
-
     def set_balance(self, balance):
         return self.balance
+
+    def deposit(self, amount):
+        self.set_balance(amount)
+
+    def withdraw(self, amount):
+        self.balance -= amount if self.balance - amount else f'Не достатньо коштів на рахунку'
 
 
 class CreditAccount(AbstractAccount):
-    def __init__(self, owner):
+    def set_account_type(self):
         self.account_type = 'credit'
-        self.owner = owner
 
     def get_account_type(self):
         return self.account_type
 
     def get_owner(self):
-        return self.owner
+        return self.owner_id
 
     def set_balance(self, balance):
         return self.balance
+
+    def deposit(self, amount):
+        self.set_balance(amount)
+
+    def withdraw(self, amount):
+        self.balance -= amount if self.balance - amount else f'Не достатньо коштів на рахунку'
 
 
 class AccountFactory:
     @staticmethod
-    def create_account(account_type, owner) -> AbstractAccount:
+    def create_account(account_type) -> AbstractAccount:
         if account_type == 'savings':
-            return SavingsAccount(owner=owner)
+            account = SavingsAccount()
+            account.set_account_type()
+            account.set_account_number(faker.random_number(27))
         elif account_type == 'deposit':
-            return DepositAccount(owner=owner)
+            return DepositAccount()
         elif account_type == 'credit':
-            return CreditAccount(owner=owner)
+            return CreditAccount()
         else:
-            raise ValueError("Unknown account type")
+            raise ValueError("Un account type")
 
     @staticmethod
     def deposit(self, account: DepositAccount, amount: float):
