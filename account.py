@@ -5,22 +5,24 @@ fake = Faker()
 
 
 class AbstractAccount(ABC):
-    def __init__(self):
-        self.__account_type: str = ''
-        self.__account_number: str = ''
-        self.__balance: float = 0.0
-        self.__owner_id: str = ''
-        self.__interest_rate: float = 0.0
+    __account_type: str
+    __account_number: str
+    __balance: float
+    __owner_id: str
+    __interest_rate: float
 
-    @abstractmethod
-    def set_account_type(self):
-        pass
+    # @abstractmethod
+    # def set_account_type(self, account_type):
+    #     self.__account_type = account_type
 
-    # def get_account_type(self):
-    #     return self.__account_type
+    def get_account_type(self):
+        return self.__account_type
 
     def set_account_number(self, account_number):
         self.__account_number = account_number
+
+    def get_account_number(self):
+        return self.__account_number
 
     def set_owner_id(self, owner_id):
         self.__owner_id = owner_id
@@ -31,9 +33,17 @@ class AbstractAccount(ABC):
     def set_interest_rate(self, interest_rate):
         self.__interest_rate = interest_rate
 
-    @abstractmethod
-    def set_balance(self, balance):
-        pass
+    @property
+    def balance(self):
+        return self.__balance
+
+    @balance.setter
+    def balance(self, balance):
+        self.__balance = balance
+
+    @property
+    def interest_rate(self):
+        return self.__interest_rate
 
     @abstractmethod
     def deposit(self, amount):
@@ -51,24 +61,20 @@ class AbstractAccount(ABC):
         pass
 
     def __str__(self):
-        return (f'Client ID: {self.owner_id}\n'
-                f'Account: "{self._account_type}" - "{self.account_number}"\n'
-                f'balance: {self.balance} $')
+        return (f'Client ID: {self.__owner_id}\n'
+                f'Account: "{self.__account_type}" - "{self.__account_number}"\n'
+                f'balance: {self.__balance} $')
 
 
 class SavingsAccount(AbstractAccount):
     def set_account_type(self):
         self.__account_type = 'savings'
 
-    def set_balance(self, balance):
-        self.__balance += self.__balance
-        return self.__balance
-
     def deposit(self, amount):
-        self.set_balance(amount)
+        self.balance = amount
 
     def withdraw(self, amount):
-        self.balance -= amount if self.balance - amount else f'Не достатньо коштів на рахунку'
+        self.balance -= amount if self.balance >= amount else f'Не достатньо коштів на рахунку'
 
     def interest_accrual(self):
         interest = self.interest_rate * self.balance / 100
@@ -77,9 +83,8 @@ class SavingsAccount(AbstractAccount):
 
 
 class DepositAccount(AbstractAccount):
-    def __init__(self, fixed_period_time=None):
-        self.fixed_period_time = fixed_period_time # фіксований період часу в місяцях
-        self.interest_penalty = 5 # відсоток штрафу при знятті коштів
+    fixed_period_time: int # фіксований період часу в місяцях
+    interest_penalty: int # відсоток штрафу при знятті коштів
 
     def set_account_type(self):
         self.account_type = 'deposit'
@@ -145,16 +150,18 @@ class AccountFactory:
     @staticmethod
     def create_account(account_type, account_data) -> AbstractAccount:
         if account_type == 'savings':
+            owner_id, account_number = account_data
             account = SavingsAccount()
             account.set_account_type()
-            account.set_account_number(fake.random_number(27))
+            account.set_owner_id(owner_id)
+            account.set_account_number(account_number)
             return account
         elif account_type == 'deposit':
             return DepositAccount()
         elif account_type == 'credit':
             return CreditAccount()
         else:
-            raise ValueError("Un account type")
+            raise ValueError(f'Unknown  account type {account_type}')
 
     @staticmethod
     def deposit(self, account, amount):
