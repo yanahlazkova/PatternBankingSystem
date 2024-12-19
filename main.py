@@ -1,5 +1,5 @@
 from bank import Bank
-from client import Client
+from client import Client, ClientFactory
 from account import AccountFactory
 from faker import Faker
 import uuid
@@ -8,8 +8,9 @@ fake = Faker()
 
 my_bank = Bank()
 
-for _ in range(5):
-    new_client = Client(fake.name(), uuid.uuid4())
+for index in range(1):
+    new_client = ClientFactory.create_client(fake.name(), str(uuid.uuid4()))
+    # account_data =
     new_account = AccountFactory().create_account('savings', new_client)
     my_bank.add_client(new_client)
     my_bank.add_account(new_account)
@@ -20,4 +21,4 @@ for client in my_bank.get_list_clients():
 
 print("\nAccounts:")
 for account in my_bank.get_list_accounts():
-    print(f"Account Type: {account.get_account_type()}, Owner: {account.owner.name}")
+    print(f"Account Type: {account.get_account_type()}, Owner: {account.get_owner_id}")
