@@ -22,5 +22,5 @@ for client in my_bank.get_list_clients():
 
 print("\nAccounts:")
 for account in my_bank.get_list_accounts():
-    # print(f"AbstractAccount Type: {account.get_account_type()}, Owner: {account.get_owner_id}")
+    # print(f"BankAccount Type: {account.get_account_type()}, Owner: {account.get_owner_id}")
     print(account)
