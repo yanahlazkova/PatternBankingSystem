@@ -140,10 +140,10 @@ class CreditAccount(AbstractAccount):
         self.account_type = 'credit'
 
     def get_owner(self):
-        return self.owner_id
+        return self.owner
 
     def set_balance(self, balance):
-        return self.balance
+        self.balance = balance
 
     def deposit(self, amount):
         self.set_balance(amount)
