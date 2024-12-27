@@ -1,6 +1,10 @@
 import uuid
 from abc import ABC, abstractmethod
+from account1 import AccountFactory
+from faker import Faker
 
+
+fake = Faker()
 
 class AbstractPerson(ABC):
     @abstractmethod
@@ -41,10 +45,18 @@ class Client(AbstractPerson):
 
 
 class ClientFactory:
-    @staticmethod
-    def create_client(name, client_id):
+
+    def create_client(self, name, client_id):
         client = Client(name=name, client_id=client_id)
+        savings_account = self.create_savings_account(client.get_name())
+        client.add_account()
         return client
+
+    def create_savings_account(client_name):
+        data_account = (client_name, fake.random_number(27), 1000, 5)
+        account_builder = AccountFactory().construct_account('savings', data_account)
+
+
 
 
 
