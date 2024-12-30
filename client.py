@@ -52,7 +52,7 @@ class ClientFactory:
         client = Client(name=name, client_id=client_id)
         client_account = self.create_account('savings', client_name=client.get_name(), overdraft_limit=100)
         client.add_account(client_account)
-        return client
+        return client, client_account
 
     @staticmethod
     def create_account(account_type,
@@ -69,9 +69,10 @@ class ClientFactory:
         if account_type == 'savings':
             return account_builder.build(account_type, overdraft_limit=overdraft_limit)
         if account_type == 'deposit':
-            return account_builder.build(period_time=period_time, balance=balance)
+            return account_builder.build(account_type, period_time=period_time, balance=balance)
         if account_type == 'credit':
-            return account_builder.build(credit_limit=credit_limit)
+            return account_builder.build(account_type, credit_limit=credit_limit)
+
 
 
 

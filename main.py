@@ -7,20 +7,10 @@ import uuid
 fake = Faker()
 
 my_bank = Bank()
+print('---Створення нового клієнта---\n')
+my_bank.create_new_client(fake.name())
+print('\n---Додавання клієнту кредитного рахунку---\n')
+my_bank.open_new_account_client(client=my_bank.clients[0], account_type='credit')
+my_bank.get_list_clients()
+my_bank.get_list_accounts()
 
-for index in range(1):
-    new_client = ClientFactory.create_client(fake.name(), str(uuid.uuid4()))
-    account_data = new_client.client_id, str(fake.random_number(27))
-    new_account = AccountFactory().create_account('savings', account_data)
-    new_client.add_account(new_account.account_number)
-    my_bank.add_client(new_client)
-    my_bank.add_account(new_account)
-
-print("Clients:")
-for client in my_bank.get_list_clients():
-    print(f"Name: {client.name}, ID: {client.client_id}")
-
-print("\nAccounts:")
-for account in my_bank.get_list_accounts():
-    # print(f"BankAccount Type: {account.get_account_type()}, Owner: {account.get_owner_id}")
-    print(account)

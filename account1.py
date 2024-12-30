@@ -2,7 +2,7 @@ import uuid
 from abc import ABC, abstractmethod
 from faker import Faker
 
-fake = Faker
+fake = Faker()
 
 class BankAccount(ABC):
     def __init__(self, account_number, owner, interest_rate):
