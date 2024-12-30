@@ -28,6 +28,7 @@ class BankAccount(ABC):
     def increase_balance(self, amount):
         """Збільшити баланс"""
         self.__balance += amount
+        return self
 
     def reduce_balance(self, amount):
         """Зменшити баланс"""
@@ -55,7 +56,7 @@ class BankAccount(ABC):
 
     def calculate_interest(self):
         """Обчислення відсотків."""
-        return self.balance * self.interest_rate
+        return self.balance * self.interest_rate / 100
 
     def apply_interest(self):
         """Нарахування відсотків на баланс."""
@@ -119,9 +120,10 @@ class DepositAccount(BankAccount):
         self.increase_balance(amount)
 
     def withdraw(self, amount):
+        print('deposit account')
         penalty = self.penalty_accrual(amount)
         if self.balance >= amount + penalty:
-            self.reduce_balance(amount)
+            self.reduce_balance(amount + penalty)
             print(f'Нараховано штраф {penalty} $, Залишок на рахунку: {self.balance} $')
 
         else:
@@ -202,69 +204,74 @@ class BankAccountBuilder:
         self.balance = 0
         self.interest_rate = 0
 
-    def with_balance(self, balance):
-        self.balance = balance
+    def with_interest_rate(self, interest_rate):
+        self.interest_rate = interest_rate
         return self
 
     # def build(self, account_type, overdraft_limit=None, period_time=None, credit_limit=None):
-    def build(self, account_type, *account_data):
+    def build(self, account_type, overdraft_limit=None, credit_limit=None, period_time=None, balance=0):
+        self.balance = balance
         if account_type == "savings":
-            self.interest_rate, overdraft_limit = account_data
-            return SavingsAccount(self.account_number,
+            return (SavingsAccount(self.account_number,
                                   self.owner,
-                                  self.interest_rate).set_overdraft_limit(overdraft_limit)
+                                  self.interest_rate)
+                    .set_overdraft_limit(overdraft_limit)
+                    .increase_balance(self.balance))
         elif account_type == "credit":
-            self.interest_rate, credit_limit = account_data
-            return CreditAccount(self.account_number,
+            return (CreditAccount(self.account_number,
                                  self.owner,
-                                 self.interest_rate).set_credit_limit(credit_limit)
+                                 self.interest_rate)
+                    .set_credit_limit(credit_limit))
         elif account_type == "deposit":
-            self.interest_rate, period_time = account_data
-            return DepositAccount(self.account_number,
+            return (DepositAccount(self.account_number,
                                   self.owner,
-                                  self.interest_rate).set_fixed_period_time(period_time)
+                                  self.interest_rate)
+                    .set_fixed_period_time(period_time)
+                    .increase_balance(self.balance))
         else:
             raise ValueError("Invalid account type")
-
-
-class AccountFactory:
-    def __init__(self):
-        self._account = None
-
-    def construct_account(self, *account_data):
-        account_number, owner, balance = account_data
-        self._account = (BankAccountBuilder(account_number, owner)
-                         .with_balance(balance)
-                         )
-        return self
-
-    def get_account(self, account_type, *account_data):
-        return self._account.build(account_type, *account_data)
 
 
 from faker import Faker
 
 fake = Faker()
-account_data_ = ('UA' + str(fake.random_number(27)), fake.name(), 10000)
-interest_rate_ = (5, 12)
-deposit_account = (AccountFactory()
-                   .construct_account(*account_data_)
-                   .get_account('deposit', *interest_rate_)
-                   )
+account_number, owner, balance = account_data = ('UA' + str(fake.random_number(27)),
+                                                 fake.name(),
+                                                 10000)
+interest_rate = 5
+period_time = 12
+
+deposit_builder = (BankAccountBuilder(account_number, owner)
+                   .with_interest_rate(interest_rate))
+deposit_account = deposit_builder.build('deposit',
+                                        period_time=period_time,
+                                        balance=balance)
+
 print(deposit_account)
 
+# Creating savings_account
+savings_builder = (BankAccountBuilder(account_number, owner)
+                   .with_interest_rate(interest_rate))
+savings_account = savings_builder.build('savings',
+                                        credit_limit=100,
+                                        balance=10000)
+
+print('Savings account:\n', savings_account)
+
 # Withdraw on deposit_account
-print("Зняття грошей")
-x = True
-while x:
-    amount_money = float(input('Введіть сумму зняття коштів: '))
-    deposit_account.withdraw(amount_money)
-    print()
-    print('Нарахування відсотків та зменьшення періоду')
-    deposit_account.interest_accrual()
-    print(deposit_account)
-    print()
-    withdraw = input('Продовжити? ')
-    if withdraw == 'N' or withdraw == 'n':
-        break
-    print()
+# print("Зняття грошей")
+# x = True
+# while x:
+#     amount_money = float(input('Введіть сумму зняття коштів: '))
+#     deposit_account.withdraw(amount_money)
+#     print()
+#     print('Нарахування відсотків та зменьшення періоду')
+#     deposit_account.interest_accrual()
+#     print(deposit_account)
+#     print()
+#     withdraw = input('Продовжити? ')
+#     if withdraw == 'N' or withdraw == 'n':
+#         break
+#     print()
+
+
