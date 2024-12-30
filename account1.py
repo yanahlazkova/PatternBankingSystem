@@ -1,5 +1,8 @@
+import uuid
 from abc import ABC, abstractmethod
+from faker import Faker
 
+fake = Faker
 
 class BankAccount(ABC):
     def __init__(self, account_number, owner, interest_rate):
@@ -209,7 +212,7 @@ class CreditAccount(BankAccount):
 
 
 class BankAccountBuilder:
-    def __init__(self, account_number, owner):
+    def __init__(self, owner, account_number='UA'+str(fake.random_number(27))):
         self.account_number = account_number
         self.owner = owner
         self.balance = 0
@@ -243,17 +246,17 @@ class BankAccountBuilder:
         else:
             raise ValueError("Invalid account type")
 
-from faker import Faker
-
-fake = Faker()
-account_number, owner, balance = account_data = ('UA' + str(fake.random_number(27)),
-                                                 fake.name(),
-                                                 0)
-interest_rate = 5
-credit_limit = 100000
+# from faker import Faker
+#
+# fake = Faker()
+# account_number, owner, balance = account_data = ('UA' + str(fake.random_number(27)),
+#                                                  fake.name(),
+#                                                  0)
+# interest_rate = 5
+# credit_limit = 100000
 # period_time = 12
 #
-# deposit_builder = (BankAccountBuilder(account_number, owner)
+# deposit_builder = (BankAccountBuilder(owner, account_number)
 #                    .with_interest_rate(interest_rate))
 # deposit_account = deposit_builder.build('deposit',
 #                                         period_time=period_time,
@@ -262,20 +265,20 @@ credit_limit = 100000
 # print(deposit_account)
 #
 # # Creating savings_account
-# savings_builder = (BankAccountBuilder(account_number, owner)
+# savings_builder = (BankAccountBuilder(owner, account_number)
 #                    .with_interest_rate(interest_rate))
 # savings_account = savings_builder.build('savings',
-#                                         credit_limit=100,
+#                                         overdraft_limit=100,
 #                                         balance=10000)
 #
 # print('Savings account:\n', savings_account)
 
-# Creating credit account
-credit_builder = (BankAccountBuilder(account_number, owner)
-                  .with_interest_rate(interest_rate))
-credit_account = credit_builder.build('credit', credit_limit=credit_limit)
-
-print('Credit account:\n', credit_account)
+# # Creating credit account
+# credit_builder = (BankAccountBuilder(owner, account_number)
+#                   .with_interest_rate(interest_rate))
+# credit_account = credit_builder.build('credit', credit_limit=credit_limit)
+#
+# print('Credit account:\n', credit_account)
 
 # Withdraw on deposit_account
 # print("Зняття грошей")
@@ -292,19 +295,19 @@ print('Credit account:\n', credit_account)
 #     if withdraw == 'N' or withdraw == 'n':
 #         break
 #     print()
-
-print('\n---Зняття кредитних коштів:---\n')
-credit_account.withdraw(50000)
-print(credit_account)
-credit_account.withdraw(26000)
-print(credit_account)
-print('Погашення кредиту:')
-credit_account.deposit(3000)
-credit_account.deposit(3000)
-print('Нарахування відсотків:')
-credit_account.apply_loan_interest()
-credit_account.apply_loan_interest()
-print()
-print('---Погашення кредиту---')
-credit_account.deposit(77175)
-print(credit_account)
+#
+# print('\n---Зняття кредитних коштів:---\n')
+# credit_account.withdraw(50000)
+# print(credit_account)
+# credit_account.withdraw(26000)
+# print(credit_account)
+# print('Погашення кредиту:')
+# credit_account.deposit(3000)
+# credit_account.deposit(3000)
+# print('Нарахування відсотків:')
+# credit_account.apply_loan_interest()
+# credit_account.apply_loan_interest()
+# print()
+# print('---Погашення кредиту---')
+# credit_account.deposit(77175)
+# print(credit_account)
