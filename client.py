@@ -1,10 +1,6 @@
-import uuid
 from abc import ABC, abstractmethod
-from account1 import AccountFactory
-from faker import Faker
+from account1 import BankAccountBuilder, BankAccount
 
-
-fake = Faker()
 
 class AbstractPerson(ABC):
     @abstractmethod
@@ -16,7 +12,7 @@ class AbstractPerson(ABC):
         pass
 
     @abstractmethod
-    def add_account(self, number_account):
+    def add_account(self, number_account: BankAccount):
         pass
 
 
@@ -32,11 +28,11 @@ class Client(AbstractPerson):
     def get_name(self):
         return self.name
 
-    def add_account(self, number_account):
-        self.list_accounts.append(number_account)
+    def add_account(self, account: BankAccount):
+        self.list_accounts.append(account)
 
     def get_list_accounts(self):
-        return "\n".join(f'\t{index + 1} {str(account)}' for index, account in enumerate(self.list_accounts))
+        return "\n".join(f'\t{index + 1} {account.account_type}: {account.account_number}' for index, account in enumerate(self.list_accounts))
 
     def __str__(self):
         return (f'id: {self.client_id}\tname: {self.name}\n'
@@ -44,17 +40,38 @@ class Client(AbstractPerson):
                 f'{self.get_list_accounts()}')
 
 
+
+from faker import Faker
+
+
+fake = Faker()
+
 class ClientFactory:
 
     def create_client(self, name, client_id):
         client = Client(name=name, client_id=client_id)
-        savings_account = self.create_savings_account(client.get_name())
-        client.add_account()
-        return client
+        client_account = self.create_account('savings', client_name=client.get_name(), overdraft_limit=100)
+        client.add_account(client_account)
+        return client, client_account
 
-    def create_savings_account(client_name):
-        data_account = (client_name, fake.random_number(27), 1000, 5)
-        account_builder = AccountFactory().construct_account('savings', data_account)
+    @staticmethod
+    def create_account(account_type,
+                       client_name,
+                       interest_rate=5,
+                       account_number='UA' + str(fake.random_number(27)),
+                       overdraft_limit=None,
+                       credit_limit=None,
+                       period_time=None,
+                       balance=0
+                       ):
+        account_builder = (BankAccountBuilder(client_name, account_number)
+                           .with_interest_rate(interest_rate))
+        if account_type == 'savings':
+            return account_builder.build(account_type, overdraft_limit=overdraft_limit)
+        if account_type == 'deposit':
+            return account_builder.build(account_type, period_time=period_time, balance=balance)
+        if account_type == 'credit':
+            return account_builder.build(account_type, credit_limit=credit_limit)
 
 
 
