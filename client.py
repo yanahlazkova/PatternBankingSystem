@@ -1,5 +1,19 @@
 from abc import ABC, abstractmethod
 from account1 import BankAccountBuilder, BankAccount
+import random
+import datetime
+
+
+def generate_unique_account_number(mfo_bank):
+    """Генераці унікального номера рахунку клиента."""
+    # Отримання поточної дати та часу
+    data = datetime.datetime.now()
+    data_part = data.strftime("%Y%m%d%H%M%S")
+
+    # Генеруємо випадкову частину номера
+    random_part = random.randint(10, 99)
+
+    return f'UA{random_part}{mfo_bank}{data_part}'
 
 
 class AbstractPerson(ABC):
@@ -43,36 +57,49 @@ class Client(AbstractPerson):
 
 from faker import Faker
 
-
 fake = Faker()
 
+
 class ClientFactory:
+    def __init__(self):
+        self.client = None
 
     def create_client(self, name, client_id):
         client = Client(name=name, client_id=client_id)
-        client_account = self.create_account('savings', client_name=client.get_name(), overdraft_limit=100)
-        client.add_account(client_account)
-        return client, client_account
+        # client_account = self.create_account('savings',
+        #                                      client=client,
+        #                                      # account_number=generate_unique_account_number(820172),
+        #                                      overdraft_limit=100)
+        # return client, client_account
+        return client
 
     @staticmethod
     def create_account(account_type,
-                       client_name,
+                       client,
                        interest_rate=5,
-                       account_number='UA' + str(fake.random_number(27)),
+                       account_number=None, #'UA' + str(fake.random_number(27)),
                        overdraft_limit=None,
                        credit_limit=None,
                        period_time=None,
                        balance=0
                        ):
-        account_builder = (BankAccountBuilder(client_name, account_number)
+        account_builder = (BankAccountBuilder(client.get_name(), account_number=generate_unique_account_number(820172))
                            .with_interest_rate(interest_rate))
         if account_type == 'savings':
-            return account_builder.build(account_type, overdraft_limit=overdraft_limit)
+            new_account = account_builder.build(account_type, overdraft_limit=overdraft_limit)
+            client.add_account(new_account)
+            return new_account
         if account_type == 'deposit':
-            return account_builder.build(account_type, period_time=period_time, balance=balance)
+            new_account = account_builder.build(account_type, period_time=period_time, balance=balance)
+            client.add_account(new_account)
+            return new_account
         if account_type == 'credit':
-            return account_builder.build(account_type, credit_limit=credit_limit)
+            new_account = account_builder.build(account_type, credit_limit=credit_limit)
+            client.add_account(new_account)
+            return new_account
 
+        def add_account_to_client(self, account):
+            self.client.add_account(account)
 
 
 

@@ -1,8 +1,6 @@
 import uuid
 from abc import ABC, abstractmethod
-from faker import Faker
 
-fake = Faker()
 
 class BankAccount(ABC):
     def __init__(self, account_number, owner, interest_rate):
@@ -76,9 +74,32 @@ class BankAccount(ABC):
         return self.get_account_info()
 
 
-class SavingsAccount(BankAccount):
+class Transferable(ABC):
+    @abstractmethod
+    def withdraw(self, amount):  # Залишаємо withdraw абстрактним
+        pass
+
+    @abstractmethod
+    def deposit(self, amount):  # Залишаємо deposit абстрактним
+        pass
+
+    def transfer(self, to_account, amount):
+        """Переказ коштів на інший рахунок."""
+        try:
+            self.withdraw(amount)
+            to_account.deposit(amount)
+            print(
+                f"Переказ {amount}$ з рахунку {self.account_number} на рахунок {to_account.account_number} успішно виконано.")
+        except ValueError as e:
+            print(f"Помилка переказу: {e}")
+        except Exception as e:
+            print(f"Сталася помилка: {e}")
+
+
+class SavingsAccount(BankAccount, Transferable):
     def __init__(self, account_number, owner, interest_rate):
         super().__init__(account_number, owner, interest_rate)
+        # super().__init__()
         self._overdraft_limit = 0
         self.account_type = 'savings'
 
@@ -153,7 +174,7 @@ class DepositAccount(BankAccount):
                 f'balance: {self.balance}$')
 
 
-class CreditAccount(BankAccount):
+class CreditAccount(BankAccount, Transferable):
     def __init__(self, account_number, owner, interest_rate):
         super().__init__(account_number, owner, interest_rate)
         self.account_type = 'credit'
@@ -201,7 +222,6 @@ class CreditAccount(BankAccount):
         self.__amount_accrued_interest += interest
         self.apply_interest()
 
-
     def get_account_info(self):
         return (f'Client: {self.owner}\n'
                 f'Account: "{self.account_type}" - "{self.account_number}"\n'
@@ -212,7 +232,7 @@ class CreditAccount(BankAccount):
 
 
 class BankAccountBuilder:
-    def __init__(self, owner, account_number='UA'+str(fake.random_number(27))):
+    def __init__(self, owner, account_number):
         self.account_number = account_number
         self.owner = owner
         self.balance = 0

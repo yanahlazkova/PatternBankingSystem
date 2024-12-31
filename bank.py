@@ -18,28 +18,31 @@ class Bank:
         self.accounts = []
 
     def create_new_client(self, name, client_id=uuid.uuid4()):
-        new_client, client_account = ClientFactory().create_client(name, client_id)
-        self.add_client(new_client)
-        self.add_account(client_account)
+        # client_factory = ClientFactory()
+        # new_client = client_factory.create_client(name, client_id)
+        # client_account = client_factory.create_account('savings', new_client, overdraft_limit=100)
+        new_client = ClientFactory().create_client(name, client_id)
+        self.add_client_to_list(new_client)
+        # self.add_account(client_account)
+        return new_client
 
-    def add_client(self, client):
+    def open_new_account_client(self, client, account_type):
+        client_account = (ClientFactory().
+                          create_account(account_type=account_type,
+                                         client=client))
+        self.add_account(client_account)
+        return client_account
+
+    def add_client_to_list(self, client):
         self.clients.append(client)
 
     def add_account(self, account):
         self.accounts.append(account)
 
-    def open_new_account_client(self, client, account_type):
-        client_account = (ClientFactory().
-                          create_account(account_type=account_type,
-                                         client_name=client.get_name(),
-                                         interest_rate=3,
-                                         credit_limit=50000))
-        self.add_account(client_account)
-
     def get_list_clients(self):
-        for client in self.clients:
-            print(client)
+        for index, client in enumerate(self.clients):
+            print(index+1, client)
 
     def get_list_accounts(self):
-        for account in self.accounts:
-            print(account)
+        for index, account in enumerate(self.accounts):
+            print(index+1, account)
