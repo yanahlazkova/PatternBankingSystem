@@ -2,15 +2,24 @@ from bank import Bank
 from client import Client, ClientFactory
 from account import AccountFactory
 from faker import Faker
-import uuid
+
 
 fake = Faker()
 
 my_bank = Bank()
 print('---Створення нового клієнта---\n')
-my_bank.create_new_client(fake.name())
+client = my_bank.create_new_client(fake.name())
+account_savings = my_bank.open_new_account_client(client, 'savings')
+print(client)
 print('\n---Додавання клієнту кредитного рахунку---\n')
-my_bank.open_new_account_client(client=my_bank.clients[0], account_type='credit')
-my_bank.get_list_clients()
-my_bank.get_list_accounts()
+credit_account = my_bank.open_new_account_client(client=client, account_type='credit')
+print('\n---Збільшення кредитного ліміту---\n')
+credit_account.set_credit_limit(100000)
+print(client)
+print('\n---Поповнення ощадного рахунку з кредитного---\n')
+account_savings = client.list_accounts[0]
+credit_account.transfer(account_savings, 60000)
+print(credit_account, account_savings)
+# my_bank.get_list_clients()
+# my_bank.get_list_accounts()
 
