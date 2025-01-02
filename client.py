@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from account1 import BankAccountBuilder, BankAccount
+from account import BankAccountBuilder, BankAccount
 import random
 import datetime
 
@@ -13,7 +13,7 @@ def generate_unique_account_number(mfo_bank):
     # Генеруємо випадкову частину номера
     random_part = random.randint(10, 99)
 
-    return f'UA{random_part}{mfo_bank}{data_part}'
+    return f'UA{random_part}{mfo_bank}{data_part}{random_part}'
 
 
 class AbstractPerson(ABC):
@@ -54,23 +54,11 @@ class Client(AbstractPerson):
                 f'{self.get_list_accounts()}')
 
 
-
-from faker import Faker
-
-fake = Faker()
-
-
 class ClientFactory:
-    def __init__(self):
-        self.client = None
-
-    def create_client(self, name, client_id):
+    @staticmethod
+    def create_client(name, client_id):
         client = Client(name=name, client_id=client_id)
-        # client_account = self.create_account('savings',
-        #                                      client=client,
-        #                                      # account_number=generate_unique_account_number(820172),
-        #                                      overdraft_limit=100)
-        # return client, client_account
+
         return client
 
     @staticmethod
@@ -78,10 +66,10 @@ class ClientFactory:
                        client,
                        interest_rate=5,
                        account_number=None, #'UA' + str(fake.random_number(27)),
-                       overdraft_limit=None,
-                       credit_limit=None,
-                       period_time=None,
-                       balance=0
+                       overdraft_limit=100, # по замовчуванню
+                       credit_limit=20000, # по замовчуванню
+                       period_time=1, # по замовчуванню 1 місяць
+                       balance=0 # по замовчуванню 1 місяць
                        ):
         account_builder = (BankAccountBuilder(client.get_name(), account_number=generate_unique_account_number(820172))
                            .with_interest_rate(interest_rate))
